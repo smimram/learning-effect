@@ -10,6 +10,7 @@
  (synopsis "Use machine to learn audio effects")
  (description "Machine learning algorithms applied to audio effects.")
  (depends
+   pulseaudio
    yojson
  )
 )

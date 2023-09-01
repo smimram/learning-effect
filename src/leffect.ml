@@ -1,10 +1,13 @@
 (** Pre-emphasis for error computation. *)
+(*
 let preemph () =
   let x' = ref 0. in
   fun x ->
     let y = x -. 0.85 *. !x' in
     x' := y;
     y
+*)
+let preemph () x = x
 
 let () =
   let error fmt = Printf.ksprintf (fun s -> print_endline s; exit 1) fmt in
@@ -13,7 +16,8 @@ let () =
   let output = ref "output.wav" in
   let json = ref "effect.json" in
   let rate = ref 0.005 in
-  let size = ref 64 in
+  let size = ref 20 in
+  let play = ref false in
   Arg.parse [
     "-i", Arg.Set_string source, "Input file.";
     "-s", Arg.Set_string source, "Source file.";
@@ -21,7 +25,8 @@ let () =
     "-o", Arg.Set_string output, "Output file.";
     "--json", Arg.Set_string json, "JSON file.";
     "--rate", Arg.Set_float rate, "Learning rate.";
-    "--size", Arg.Set_int size, "Size of the network."
+    "--size", Arg.Set_int size, "Size of the network.";
+    "--play", Arg.Set play, "Immdiately play processed data."
   ] (fun _ -> ()) "learn [options]";
   if !source = "" then error "Please specify an input file.";
   if !target = "" then
@@ -32,6 +37,19 @@ let () =
       let samples = WAV.samples source in
       let output = WAV.Writer.openfile ~channels ~samplerate !output in
       let json = Yojson.Basic.from_file !json in
+      let pa =
+        if !play then
+          let sample =
+            { Pulseaudio.
+              sample_format = Sample_format_float32le;
+              sample_rate = samplerate;
+              sample_chans = channels
+            }
+          in
+          let pa = Pulseaudio.Simple.create ~client_name:"leffect" ~stream_name:"leffect" ~sample ~dir:Dir_playback () in
+          Some pa
+        else None
+      in
       let net = Array.init channels (fun _ -> Net.of_json json) in
       try
         let i = ref 0 in
@@ -40,6 +58,7 @@ let () =
           incr i;
           let x = WAV.sample_float source in
           let y = Array.init channels (fun c -> Net.process net.(c) x.(c)) in
+          if !play then Pulseaudio.Simple.write (Option.get pa) (Array.map (fun x -> [|x|]) y) 0 1;
           WAV.Writer.samples_float output y
         done
       with End_of_file -> Printf.printf "\rDone!\n%!"
@@ -50,7 +69,21 @@ let () =
       let source = WAV.openfile !source in
       let target = WAV.openfile !target in
       let samples = WAV.samples source in
-      let output = WAV.Writer.openfile ~channels:1 ~samplerate:(WAV.samplerate source) !output in
+      let samplerate = WAV.samplerate source in
+      let output = WAV.Writer.openfile ~channels:1 ~samplerate !output in
+      let pa =
+        if !play then
+          let sample =
+            { Pulseaudio.
+              sample_format = Sample_format_float32le;
+              sample_rate = samplerate;
+              sample_chans = 1
+            }
+          in
+          let pa = Pulseaudio.Simple.create ~client_name:"leffect" ~stream_name:"leffect" ~sample ~dir:Dir_playback () in
+          Some pa
+        else None
+      in
       let net = Net.create (`WrightGRU !size) in
       try
         let i = ref 0 in
@@ -66,6 +99,7 @@ let () =
           let yt = WAV.sample_float target in
           let yt = yt.(0) in
           WAV.Writer.sample_float output yc;
+          if !play then Pulseaudio.Simple.write (Option.get pa) [|[|yc|]|] 0 1;
           (* Printf.printf "S: %.02f\tT: %.02f\tC: %.02f\n" x yt yc; *)
           let yc = pec yc in
           let yt = pet yt in

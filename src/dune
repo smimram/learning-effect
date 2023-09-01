@@ -1,4 +1,4 @@
 (executable
  (public_name leffect)
- (libraries yojson)
+ (libraries pulseaudio yojson)
 )
