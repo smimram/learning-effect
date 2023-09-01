@@ -1,3 +1,4 @@
 (executable
  (name learn)
+ (public_name leffect)
 )
