@@ -37,6 +37,18 @@ let create () =
     h  = 0.
   }
 
+let to_json net = `Assoc [
+    "vr", `Float net.vr;
+    "wr", `Float net.wr;
+    "br", `Float net.br;
+    "vu", `Float net.vu;
+    "wu", `Float net.wu;
+    "bu", `Float net.bu;
+    "vc", `Float net.vc;
+    "wc", `Float net.wc;
+    "bc", `Float net.bc;
+  ]
+
 (** Process one input. *)
 let process net x =
   let r = ML.sigmoid (net.vr *. x +. net.wr *. net.h +. net.br) in

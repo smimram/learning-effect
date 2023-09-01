@@ -31,3 +31,11 @@ let descent net y_expected eta =
       w.(i) <- w.(i) -. eta *. d *. GRU.output g.(i);
       GRU.descent g.(i) (eta *. d *. w.(i))
     done
+
+let to_json = function
+  | WrightGRU (w, g, _) ->
+    `Assoc [
+      "kind", `String "wright-gru";
+      "w", `List (Array.to_list w |> List.map (fun w -> `Float w));
+      "gru", `List (Array.to_list g |> List.map GRU.to_json)
+    ]

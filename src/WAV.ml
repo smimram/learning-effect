@@ -8,7 +8,7 @@ type t =
   }
 
 exception Invalid
-  exception Unsupported
+exception Unsupported
 
 let openfile fname =
   let ic = open_in fname in
@@ -36,6 +36,8 @@ let openfile fname =
 let channels wav = wav.channels
 
 let samplerate wav = wav.samplerate
+
+let samples wav = wav.length / (wav.channels * wav.samplesize / 8)
 
 let sample wav =
   Array.init wav.channels (fun _ -> String.get_int16_le (really_input_string wav.ic 2) 0)
