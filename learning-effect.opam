@@ -8,6 +8,7 @@ homepage: "https://github.com/smimram/learning-effect"
 bug-reports: "https://github.com/smimram/learning-effect/issues"
 depends: [
   "dune" {>= "3.0"}
+  "yojson"
   "odoc" {with-doc}
 ]
 build: [
