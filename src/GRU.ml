@@ -11,11 +11,11 @@ type t =
     mutable vc : float;
     mutable wc : float;
     mutable bc : float;
-    mutable x : float;
-    mutable r : float;
-    mutable u : float;
-    mutable c : float;
-    mutable h : float;
+    mutable x  : float;
+    mutable r  : float;
+    mutable u  : float;
+    mutable c  : float;
+    mutable h  : float;
   }
 
 let create () =
@@ -23,18 +23,18 @@ let create () =
   {
     vr = init ();
     wr = init ();
-    br = init ();
+    br = 0.;
     vu = init ();
     wu = init ();
-    bu = init ();
+    bu = 0.;
     vc = init ();
     wc = init ();
-    bc = init ();
-    x = 0.;
-    r = 0.;
-    u = 0.;
-    c = 0.;
-    h = 0.
+    bc = 0.;
+    x  = 0.;
+    r  = 0.;
+    u  = 0.;
+    c  = 0.;
+    h  = 0.
   }
 
 (** Process one input. *)
@@ -55,12 +55,13 @@ let output net = net.h
 
 (** Gradient descent. *)
 let descent net eta =
+  (* Printf.printf "eta: %.02f\n%!" eta; *)
   let c' = net.u *. (1. -. net.c *. net.c) in
   let r' = c' *. net.wc *. net.h *. net.r *. (1. -. net.r) in
+  let u' = (net.c -. net.h) *. net.u *. (1. -. net.u) in
   net.vr <- net.vr -. eta *. r' *. net.x;
   net.wr <- net.wr -. eta *. r' *. net.h;
   net.br <- net.br -. eta *. r';
-  let u' = (net.c -. net.h) *. net.u *. (1. -. net.u) in
   net.vu <- net.vu -. eta *. u' *. net.x;
   net.wu <- net.wu -. eta *. u' *. net.h;
   net.bu <- net.bu -. eta *. u';
