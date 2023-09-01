@@ -1,11 +1,19 @@
+(** Pre-emphasis for error computation. *)
+let preemph () =
+  let x' = ref 0. in
+  fun x ->
+    let y = x -. 0.85 *. !x' in
+    x' := y;
+    y
+
 let () =
   let error fmt = Printf.ksprintf (fun s -> print_endline s; exit 1) fmt in
   let source = ref "" in
   let target = ref "" in
   let output = ref "output.wav" in
   let json = ref "effect.json" in
-  let rate = ref 0.01 in
-  let size = ref 20 in
+  let rate = ref 0.005 in
+  let size = ref 64 in
   Arg.parse [
     "-i", Arg.Set_string source, "Input file.";
     "-s", Arg.Set_string source, "Source file.";
@@ -47,6 +55,8 @@ let () =
       try
         let i = ref 0 in
         ignore (Sys.signal Sys.sigint (Signal_handle (fun _ -> raise End_of_file)));
+        let pec = preemph () in
+        let pet = preemph () in
         while true do
           Printf.printf "\rProcessing: %.00f%%%!" (100. *. float !i /. float samples);
           incr i;
@@ -57,7 +67,9 @@ let () =
           let yt = yt.(0) in
           WAV.Writer.sample_float output yc;
           (* Printf.printf "S: %.02f\tT: %.02f\tC: %.02f\n" x yt yc; *)
-          Net.descent net yt !rate
+          let yc = pec yc in
+          let yt = pet yt in
+          Net.descent net (!rate *. (yc -. yt))
         done;
       with
       | End_of_file ->
