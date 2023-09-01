@@ -50,6 +50,9 @@ let process net x =
   net.h <- y;
   y
 
+(** Last computed output. *)
+let output net = net.h
+
 (** Gradient descent. *)
 let descent net eta =
   let c' = net.u *. (1. -. net.c *. net.c) in
