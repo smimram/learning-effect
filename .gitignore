@@ -1,0 +1,10 @@
+*~
+_build
+*.aux
+*.bbl
+*.blg
+*.fdb*
+*.fls
+*.log
+*.out
+*.pdf

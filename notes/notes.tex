@@ -1,0 +1,49 @@
+\documentclass[a4paper]{article}
+\usepackage[hidelinks]{hyperref}
+\usepackage{amsmath}
+
+\newcommand{\ce}{\operatorname{e}}
+
+\title{The theory behind the amplifier}
+\author{Samuel Mimram}
+
+\begin{document}
+\maketitle
+
+This is my own take at trying to understand and implement~\cite{wright2019real}.
+
+\section{Activation functions}
+We write $\sigma$ for the \emph{sigmoid function} (aka \emph{logistic function})
+defined by
+\[
+  \sigma(x) = \frac 1 {1 + \ce^{-x}}
+\]
+whose derivative is
+\[
+  \sigma'(x) = \sigma(x)(1-\sigma(x))
+\]
+
+We write $\phi$ for the \emph{hyperbolic tangent function} defined as
+\[
+  \phi(x)=\frac{\ce^{x}-\ce^{-x}}{\ce^{x}+\ce^{-x}}
+\]
+whose derivative is
+\[
+  \phi'(x)=1-(\phi(x))^2
+\]
+
+\section{Gated recurrent units}
+A \emph{gated recurrent unit} or \emph{GRU} takes as input the signal $x$ and
+the (hidden) state $h$ and returns an output $y$ and a new value for the state
+$h$. In practice the new state $h$ and the output $y$ are the same here, so that
+we reserve the notation~$h$ to the previous input state. We have
+\begin{align*}
+  z&=\sigma(w^zx+w^zh+b^z)&&\text{update gate}\\
+  r&=\sigma(w^rx+u^rh+b^r)&&\text{reset gate}\\
+  c&=\phi(w^cx+u^crh+b^c)&&\text{candidate activation}\\
+  y&=(1-z)h+zc&&\text{output}
+\end{align*}
+
+\bibliographystyle{plainurl}
+\bibliography{papers}
+\end{document}
