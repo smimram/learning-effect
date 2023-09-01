@@ -4,7 +4,7 @@ let () =
   let target = ref "" in
   let output = ref "output.wav" in
   let json = ref "effect.json" in
-  let rate = ref 0.1 in
+  let rate = ref 0.01 in
   let size = ref 20 in
   Arg.parse [
     "-i", Arg.Set_string source, "Input file.";
