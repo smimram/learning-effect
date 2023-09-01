@@ -29,7 +29,7 @@ let openfile fname =
   let samplesize = input_short () in
   if input 4 <> "data" then raise Invalid;
   let length = input_int () in
-  Printf.printf "%d / %d / %d / %d\n%!" channels samplereate samplesize length;
+  (* Printf.printf "%d / %d / %d / %d\n%!" channels samplereate samplesize length; *)
   if samplesize <> 16 then raise Unsupported;
   { ic; channels; samplereate; samplesize; length }
 
@@ -41,3 +41,6 @@ let sample wav =
 
 let sample_float wav =
   sample wav |> Array.map (fun x -> float x /. 32768.)
+
+let sample_mean_float wav =
+  sample_float wav |> Array.fold_left (+.) 0. |> fun x -> x /. float (channels wav)

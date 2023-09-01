@@ -1,4 +1,4 @@
 all: test
 
 test:
-	@dune exec ./learn.exe
+	@dune exec -- ./learn.exe -s source.wav -t target.wav
