@@ -3,6 +3,8 @@
 \usepackage{amsmath}
 
 \newcommand{\ce}{\operatorname{e}}
+\newcommand{\pa}[1]{\left(#1\right)}
+\newcommand{\ol}{\overline}
 
 \title{The theory behind the amplifier}
 \author{Samuel Mimram}
@@ -36,13 +38,49 @@ whose derivative is
 A \emph{gated recurrent unit} or \emph{GRU} takes as input the signal $x$ and
 the (hidden) state $h$ and returns an output $y$ and a new value for the state
 $h$. In practice the new state $h$ and the output $y$ are the same here, so that
-we reserve the notation~$h$ to the previous input state. We have
+we reserve the notation~$h$ for the previous input state. We have
 \begin{align*}
-  z&=\sigma(w^zx+w^zh+b^z)&&\text{update gate}\\
-  r&=\sigma(w^rx+u^rh+b^r)&&\text{reset gate}\\
-  c&=\phi(w^cx+u^crh+b^c)&&\text{candidate activation}\\
-  y&=(1-z)h+zc&&\text{output}
+  u&=\sigma(v^ux+w^uh+b^u)&&\text{update gate}\\
+  r&=\sigma(v^rx+w^rh+b^r)&&\text{reset gate}\\
+  c&=\phi(v^cx+w^crh+b^c)&&\text{candidate activation}\\
+  y&=(1-u)h+uc&&\text{output}
 \end{align*}
+
+The partial derivatives are
+\begin{align*}
+  \frac{\partial y}{\partial u}&=c-h\\
+  \frac{\partial y}{\partial c}&=u\\
+  \frac{\partial y}{\partial r}&=\frac{\partial y}{\partial c}\frac{\partial c}{\partial r}=u(1-c^2)w^ch\\
+  \frac{\partial y}{\partial v^u}&=\frac{\partial y}{\partial u}\frac{\partial u}{\partial v^u}=(c-h)u(1-u)x\\
+  \frac{\partial y}{\partial w^u}&=\frac{\partial y}{\partial u}\frac{\partial u}{\partial w^u}=(c-h)u(1-u)h\\
+  \frac{\partial y}{\partial b^u}&=\frac{\partial y}{\partial u}\frac{\partial u}{\partial b^u}=(c-h)u(1-u)\\
+  \frac{\partial y}{\partial v^r}&=\frac{\partial y}{\partial r}\frac{\partial r}{\partial v^r}=u(1-c^2)w^chr(1-r)x\\
+  \frac{\partial y}{\partial w^r}&=\frac{\partial y}{\partial r}\frac{\partial r}{\partial w^r}=u(1-c^2)w^chr(1-r)h\\
+  \frac{\partial y}{\partial b^r}&=\frac{\partial y}{\partial r}\frac{\partial r}{\partial b^r}=u(1-c^2)w^chr(1-r)\\
+  \frac{\partial y}{\partial v^c}&=\frac{\partial y}{\partial c}\frac{\partial c}{\partial v^c}=u(1-c^2)x\\
+  \frac{\partial y}{\partial w^c}&=\frac{\partial y}{\partial c}\frac{\partial c}{\partial w^c}=u(1-c^2)rh\\
+  \frac{\partial y}{\partial b^c}&=\frac{\partial y}{\partial c}\frac{\partial c}{\partial b^c}=u(1-c^2)
+\end{align*}
+
+\section{General architecture}
+We take $n$ gated recurrent units in parallel and, writing $y_i$ for the output
+of the $i$-th GRU, the global output is
+\[
+  z=\pa{\sum_iw^z_iy_i}+b^z
+\]
+
+\section{Gradient descent}
+Given an input $x$, we write $z$ for the output of our network and $\ol z$. The error is
+\[
+  E=\frac 12(z-\ol z)^2
+\]
+We have the following partial derivatives
+\begin{align*}
+  \frac{\partial E}{\partial b^z}&=\frac{\partial E}{\partial z}\frac{\partial z}{\partial b^z}=(z-\ol z)\\
+  \frac{\partial E}{\partial w_i^z}&=\frac{\partial E}{\partial z}\frac{\partial z}{\partial w_i^z}=(z-\ol z)y_i\\
+  \frac{\partial E}{\partial y_i}&=\frac{\partial E}{\partial z}\frac{\partial z}{\partial y_i}=(z-\ol z)w_i^z
+\end{align*}
+which allow computing all the partial derivatives when combined with the above.
 
 \bibliographystyle{plainurl}
 \bibliography{papers}
