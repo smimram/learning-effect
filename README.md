@@ -23,6 +23,7 @@ file by the current network. Some other useful parameters are
 
 - `--rate`: the learning rate
 - `--size`: the size of the network
+- `--play`: play the output in realtime
 
 At the end, it produces an `effect.json` file (the name can be changed with the
 `--json` flag).
