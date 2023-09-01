@@ -35,28 +35,37 @@ whose derivative is
 \]
 
 \section{Gated recurrent units}
-A \emph{gated recurrent unit} or \emph{GRU} takes as input the signal $x$ and
-the (hidden) state $h$ and returns an output $y$ and a new value for the state
-$h$. In practice the new state $h$ and the output $y$ are the same here, so that
-we reserve the notation~$h$ for the previous input state. We have
+A \emph{gated recurrent unit} or \emph{GRU} from~\cite{cho2014learning} takes as
+input the signal $x$ and the (hidden) state $h$ and returns an output $y$ and a
+new value for the state $h$. In practice the new state $h$ and the output $y$
+are the same here, so that we reserve the notation~$h$ for the previous input
+state. We have
 \begin{align*}
-  u&=\sigma(v^ux+w^uh+b^u)&&\text{update gate}\\
   r&=\sigma(v^rx+w^rh+b^r)&&\text{reset gate}\\
+  u&=\sigma(v^ux+w^uh+b^u)&&\text{update gate}\\
   c&=\phi(v^cx+w^crh+b^c)&&\text{candidate activation}\\
   y&=(1-u)h+uc&&\text{output}
 \end{align*}
+The interpretation is the following
+\begin{itemize}
+\item the reset gate~$r$ learns which data needs to be forgotten,
+\item the candidate activation~$c$ is the proposed computation,
+\item the update gate~$u$ learns how much to update from previous computation.
+\end{itemize}
+More usual notations are $W$/$U$ for $v$/$w$, $z$ for $u$, $\hat h$ for $c$, $h$
+for $y$.
 
 The partial derivatives are
 \begin{align*}
+  \frac{\partial y}{\partial r}&=\frac{\partial y}{\partial c}\frac{\partial c}{\partial r}=u(1-c^2)w^ch\\
   \frac{\partial y}{\partial u}&=c-h\\
   \frac{\partial y}{\partial c}&=u\\
-  \frac{\partial y}{\partial r}&=\frac{\partial y}{\partial c}\frac{\partial c}{\partial r}=u(1-c^2)w^ch\\
-  \frac{\partial y}{\partial v^u}&=\frac{\partial y}{\partial u}\frac{\partial u}{\partial v^u}=(c-h)u(1-u)x\\
-  \frac{\partial y}{\partial w^u}&=\frac{\partial y}{\partial u}\frac{\partial u}{\partial w^u}=(c-h)u(1-u)h\\
-  \frac{\partial y}{\partial b^u}&=\frac{\partial y}{\partial u}\frac{\partial u}{\partial b^u}=(c-h)u(1-u)\\
   \frac{\partial y}{\partial v^r}&=\frac{\partial y}{\partial r}\frac{\partial r}{\partial v^r}=u(1-c^2)w^chr(1-r)x\\
   \frac{\partial y}{\partial w^r}&=\frac{\partial y}{\partial r}\frac{\partial r}{\partial w^r}=u(1-c^2)w^chr(1-r)h\\
   \frac{\partial y}{\partial b^r}&=\frac{\partial y}{\partial r}\frac{\partial r}{\partial b^r}=u(1-c^2)w^chr(1-r)\\
+  \frac{\partial y}{\partial v^u}&=\frac{\partial y}{\partial u}\frac{\partial u}{\partial v^u}=(c-h)u(1-u)x\\
+  \frac{\partial y}{\partial w^u}&=\frac{\partial y}{\partial u}\frac{\partial u}{\partial w^u}=(c-h)u(1-u)h\\
+  \frac{\partial y}{\partial b^u}&=\frac{\partial y}{\partial u}\frac{\partial u}{\partial b^u}=(c-h)u(1-u)\\
   \frac{\partial y}{\partial v^c}&=\frac{\partial y}{\partial c}\frac{\partial c}{\partial v^c}=u(1-c^2)x\\
   \frac{\partial y}{\partial w^c}&=\frac{\partial y}{\partial c}\frac{\partial c}{\partial w^c}=u(1-c^2)rh\\
   \frac{\partial y}{\partial b^c}&=\frac{\partial y}{\partial c}\frac{\partial c}{\partial b^c}=u(1-c^2)
