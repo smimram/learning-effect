@@ -37,6 +37,7 @@ let create () =
     h  = 0.
   }
 
+(** Export to JSON. *)
 let to_json net = `Assoc [
     "vr", `Float net.vr;
     "wr", `Float net.wr;
@@ -48,6 +49,27 @@ let to_json net = `Assoc [
     "wc", `Float net.wc;
     "bc", `Float net.bc;
   ]
+
+(** Create from JSON. *)
+let of_json json =
+  let open Yojson.Basic.Util in
+  let json = to_assoc json in
+  {
+    vr = List.assoc "vr" json |> to_float;
+    wr = List.assoc "wr" json |> to_float;
+    br = List.assoc "br" json |> to_float;
+    vu = List.assoc "vu" json |> to_float;
+    wu = List.assoc "wu" json |> to_float;
+    bu = List.assoc "bu" json |> to_float;
+    vc = List.assoc "vc" json |> to_float;
+    wc = List.assoc "wc" json |> to_float;
+    bc = List.assoc "bc" json |> to_float;
+    x = 0.;
+    r = 0.;
+    u = 0.;
+    c = 0.;
+    h = 0.
+  }
 
 (** Process one input. *)
 let process net x =
