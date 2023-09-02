@@ -1,5 +1,6 @@
 (** Gated recurrent units. *)
 
+(** A gated recurrent unit. *)
 type t =
   {
     mutable vr : float;
@@ -18,18 +19,19 @@ type t =
     mutable h  : float;
   }
 
+(** Create a GRU. *)
 let create () =
   let init () = Random.float 2. -. 1. in
   {
     vr = init ();
     wr = init ();
-    br = 0.;
+    br = init ();
     vu = init ();
     wu = init ();
-    bu = 0.;
+    bu = init ();
     vc = init ();
     wc = init ();
-    bc = 0.;
+    bc = init ();
     x  = 0.;
     r  = 0.;
     u  = 0.;
