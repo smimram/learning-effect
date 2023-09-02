@@ -28,15 +28,15 @@ let () =
     "--json", Arg.Set_string json, "JSON file.";
     "--rate", Arg.Set_float rate, "Learning rate.";
     "--size", Arg.Set_int size, "Size of the network.";
-    "--play", Arg.Set play, "Immdiately play processed data."
+    "--play", Arg.Set play, "Immdiately play processed data on soundcard.";
   ] (fun _ -> ()) "learn [options]";
   if !source = "" then error "Please specify an input file.";
+  let source = WAV.openfile !source in
+  let channels = WAV.channels source in
+  let samplerate = WAV.samplerate source in
+  let samples = WAV.samples source in
   if !target = "" then
     (
-      let source = WAV.openfile !source in
-      let channels = WAV.channels source in
-      let samplerate = WAV.samplerate source in
-      let samples = WAV.samples source in
       let output = Output.create ~channels ~samplerate ~filename:!output ~soundcard:!play () in
       let json = Yojson.Basic.from_file !json in
       let net = Array.init channels (fun _ -> Net.of_json json) in
@@ -54,10 +54,7 @@ let () =
   else
     (
       Random.self_init ();
-      let source = WAV.openfile !source in
       let target = WAV.openfile !target in
-      let samples = WAV.samples source in
-      let samplerate = WAV.samplerate source in
       let output = Output.create ~channels:1 ~samplerate ~filename:!output ~soundcard:!play () in
       let net = Net.create (`WrightGRU !size) in
       try
