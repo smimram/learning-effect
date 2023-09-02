@@ -9,6 +9,8 @@ let preemph () =
 *)
 let preemph () x = x
 
+let () = ignore Output.create
+
 let () =
   let error fmt = Printf.ksprintf (fun s -> print_endline s; exit 1) fmt in
   let source = ref "" in
@@ -35,21 +37,8 @@ let () =
       let channels = WAV.channels source in
       let samplerate = WAV.samplerate source in
       let samples = WAV.samples source in
-      let output = WAV.Writer.openfile ~channels ~samplerate !output in
+      let output = Output.create ~channels ~samplerate ~filename:!output ~soundcard:!play () in
       let json = Yojson.Basic.from_file !json in
-      let pa =
-        if !play then
-          let sample =
-            { Pulseaudio.
-              sample_format = Sample_format_float32le;
-              sample_rate = samplerate;
-              sample_chans = channels
-            }
-          in
-          let pa = Pulseaudio.Simple.create ~client_name:"leffect" ~stream_name:"leffect" ~sample ~dir:Dir_playback () in
-          Some pa
-        else None
-      in
       let net = Array.init channels (fun _ -> Net.of_json json) in
       try
         let i = ref 0 in
@@ -58,8 +47,7 @@ let () =
           incr i;
           let x = WAV.sample_float source in
           let y = Array.init channels (fun c -> Net.process net.(c) x.(c)) in
-          if !play then Pulseaudio.Simple.write (Option.get pa) (Array.map (fun x -> [|x|]) y) 0 1;
-          WAV.Writer.samples_float output y
+          Output.sample output y
         done
       with End_of_file -> Printf.printf "\rDone!\n%!"
     )
@@ -70,20 +58,7 @@ let () =
       let target = WAV.openfile !target in
       let samples = WAV.samples source in
       let samplerate = WAV.samplerate source in
-      let output = WAV.Writer.openfile ~channels:1 ~samplerate !output in
-      let pa =
-        if !play then
-          let sample =
-            { Pulseaudio.
-              sample_format = Sample_format_float32le;
-              sample_rate = samplerate;
-              sample_chans = 1
-            }
-          in
-          let pa = Pulseaudio.Simple.create ~client_name:"leffect" ~stream_name:"leffect" ~sample ~dir:Dir_playback () in
-          Some pa
-        else None
-      in
+      let output = Output.create ~channels:1 ~samplerate ~filename:!output ~soundcard:!play () in
       let net = Net.create (`WrightGRU !size) in
       try
         let i = ref 0 in
@@ -98,8 +73,7 @@ let () =
           let yc = Net.process net x in
           let yt = WAV.sample_float target in
           let yt = yt.(0) in
-          WAV.Writer.sample_float output yc;
-          if !play then Pulseaudio.Simple.write (Option.get pa) [|[|yc|]|] 0 1;
+          Output.sample output [|yc|];
           (* Printf.printf "S: %.02f\tT: %.02f\tC: %.02f\n" x yt yc; *)
           let yc = pec yc in
           let yt = pet yt in
