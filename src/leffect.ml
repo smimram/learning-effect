@@ -24,7 +24,9 @@ let () =
     "-s", Arg.Set_string source, "Source file.";
     "-t", Arg.Set_string target, "Target file.";
     "-o", Arg.Set_string output, "Output file.";
+    "-j", Arg.Set_string json, "JSON file.";
     "--json", Arg.Set_string json, "JSON file.";
+    "-r", Arg.Set_float rate, "Learning rate.";
     "--rate", Arg.Set_float rate, "Learning rate.";
     "--size", Arg.Set_int size, "Size of the network.";
     "-p", Arg.Set play, "Play processed data on soundcard.";
@@ -35,6 +37,9 @@ let () =
   let channels = WAV.channels source in
   let samplerate = WAV.samplerate source in
   let samples = WAV.samples source in
+  if !target = "" then Printf.printf "Playing:\n" else Printf.printf "Learning:\n";
+  Printf.printf "- rate: %f\n" !rate;
+  Printf.printf "- json: %s\n" !json;
   if !target = "" then
     (
       let output = Output.create ~channels ~samplerate ~filename:!output ~soundcard:!play () in

@@ -1,11 +1,16 @@
 # Machine learning audio effects
 
 Trying to learn machine learning for audio effects. This is my own take at
-coding the [guitar amplifier model based on
-LSTMs](https://github.com/Alec-Wright/Automated-GuitarAmpModelling) (also
-[described
-here](https://towardsdatascience.com/neural-networks-for-real-time-audio-stateful-lstm-b534babeae5d)). In
-OCaml.
+coding audio effects using machine learning. In OCaml.
+
+It started with the
+[LSTM](https://en.wikipedia.org/wiki/Long_short-term_memory)-based approach
+described in
+
+- [this github repository](https://github.com/Alec-Wright/Automated-GuitarAmpModelling)
+- [this article](https://www.dafx.de/paper-archive/2019/DAFx2019_paper_43.pdf)
+- [this blog
+post](https://towardsdatascience.com/neural-networks-for-real-time-audio-stateful-lstm-b534babeae5d)
 
 ## Usage
 
